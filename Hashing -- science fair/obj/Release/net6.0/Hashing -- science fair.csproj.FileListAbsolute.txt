@@ -1,0 +1,5 @@
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Release/net6.0/Hashing -- science fair.csproj.AssemblyReference.cache
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Release/net6.0/Hashing -- science fair.GeneratedMSBuildEditorConfig.editorconfig
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Release/net6.0/Hashing -- science fair.AssemblyInfoInputs.cache
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Release/net6.0/Hashing -- science fair.AssemblyInfo.cs
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Release/net6.0/Hashing -- science fair.csproj.CoreCompileInputs.cache

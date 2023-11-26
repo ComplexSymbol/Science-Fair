@@ -1,0 +1,26 @@
+﻿<Properties StartupConfiguration="{6547AA40-3CFA-4967-BD27-5B791DF7AB4C}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Hashing -- science fair/HashDependencies.cs">
+    <Files>
+      <File FileName="Hashing -- science fair/Program.cs" Line="35" Column="56" />
+      <File FileName="Hashing -- science fair/HashDependencies.cs" Line="45" Column="103" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Hashing -- science fair" expanded="True">
+            <Node name="Hashing -- science fair" expanded="True">
+              <Node name="Dependencies" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Hashing_220--_220science_220fair PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+</Properties>

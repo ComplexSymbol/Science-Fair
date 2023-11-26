@@ -1,0 +1,15 @@
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/bin/Debug/net7.0/Hashing -- science fair
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/bin/Debug/net7.0/Hashing -- science fair.deps.json
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/bin/Debug/net7.0/Hashing -- science fair.runtimeconfig.json
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/bin/Debug/net7.0/Hashing -- science fair.dll
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/bin/Debug/net7.0/Hashing -- science fair.pdb
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.csproj.AssemblyReference.cache
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.GeneratedMSBuildEditorConfig.editorconfig
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.AssemblyInfoInputs.cache
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.AssemblyInfo.cs
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.csproj.CoreCompileInputs.cache
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.dll
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/refint/Hashing -- science fair.dll
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.pdb
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/Hashing -- science fair.genruntimeconfig.cache
+/Users/aritamsky/src/Hashing -- science fair/Hashing -- science fair/obj/Debug/net7.0/ref/Hashing -- science fair.dll
