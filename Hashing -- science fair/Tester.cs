@@ -39,7 +39,7 @@ namespace TestLibrary
 			{
 				watch.Reset();
 				watch.Start();
-                Utilities.HashSetup(StringGenerator(length));
+                Utilities.Hash(StringGenerator(length));
 				watch.Stop();
 
 				if (i > 1)
@@ -61,7 +61,7 @@ namespace TestLibrary
 				ulong[] initialHashVals = new ulong[8];
 				ulong[] consts = new ulong[64];
 
-				(ulong, ulong)[] currentHashReturn = Utilities.HashSetup(StringGenerator(length));
+				(ulong, ulong)[] currentHashReturn = Utilities.Hash(StringGenerator(length));
 
 				for (int j = 0; j < currentHashReturn.Length; j++)
 				{
@@ -89,7 +89,7 @@ namespace TestLibrary
 
             for (int i = 0; i < rounds; i++)
             {
-                (ulong, ulong)[] currentHashReturn = Utilities.HashSetup(StringGenerator(length));
+                (ulong, ulong)[] currentHashReturn = Utilities.Hash(StringGenerator(length));
 
                 for (int j = 0; j < currentHashReturn.Length; j++)
                 {
@@ -120,7 +120,7 @@ namespace TestLibrary
 
             for (int i = 0; i < rounds; i++)
             {
-                (ulong, ulong)[] currentHashReturn = Utilities.HashSetup(StringGenerator(length));
+                (ulong, ulong)[] currentHashReturn = Utilities.Hash(StringGenerator(length));
 
                 for (int j = 0; j < currentHashReturn.Length; j++)
                 {

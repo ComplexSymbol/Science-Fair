@@ -106,7 +106,7 @@ namespace HashDependencies
         ///<summary>
         ///Setup for hash function, returns a tuple array of Item1: consts, Item2: initialHashVals
         ///</summary>
-        public static (ulong, ulong)[] HashSetup(string input, bool constIHVMode = false)
+        public static (ulong, ulong)[] Hash(string input, bool constIHVMode = true)
         {
             char[] chars = input.ToCharArray();
 
@@ -146,22 +146,16 @@ namespace HashDependencies
                 allVals[i - 1].Item1 = consts[i - 1];
             }
 
-            if (constIHVMode)
-            {
-                foreach (ulong i in initialHashVals)
-                    Console.WriteLine("0x" + i.ToString("X"));
+            foreach (ulong i in initialHashVals)
+                Console.WriteLine("0x" + i.ToString("X"));
 
-                Console.WriteLine();
-                Console.WriteLine("consts: ");
+            Console.WriteLine();
+            Console.WriteLine("consts: ");
 
-                foreach (ulong i in consts)
-                    Console.WriteLine("0x" + i.ToString("X"));
+            foreach (ulong i in consts)
+                Console.WriteLine("0x" + i.ToString("X"));
 
-                return allVals;
-            }
-
-            //PREPROCESSING -- Blocking and stuff
-            byte[,] blocks = new byte[64, 0];
+            return allVals;
         }
     }
 }
