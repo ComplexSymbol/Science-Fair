@@ -1,16 +1,15 @@
 ﻿<Properties StartupConfiguration="{6547AA40-3CFA-4967-BD27-5B791DF7AB4C}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Hashing -- science fair/HashDependencies.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Hashing -- science fair/Tester.cs">
     <Files>
-      <File FileName="Hashing -- science fair/Program.cs" Line="35" Column="56" />
-      <File FileName="Hashing -- science fair/HashDependencies.cs" Line="45" Column="103" />
+      <File FileName="Hashing -- science fair/Program.cs" Line="24" Column="20" />
+      <File FileName="Hashing -- science fair/HashDependencies.cs" Line="1" Column="69" />
+      <File FileName="Hashing -- science fair/EmptyClass.cs" Line="101" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Hashing -- science fair" expanded="True">
-            <Node name="Hashing -- science fair" expanded="True">
-              <Node name="Dependencies" expanded="True" />
-            </Node>
+            <Node name="Hashing -- science fair" expanded="True" />
           </Node>
         </State>
       </Pad>

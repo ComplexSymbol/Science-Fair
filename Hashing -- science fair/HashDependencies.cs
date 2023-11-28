@@ -1,4 +1,7 @@
-﻿using System.Numerics;
+﻿//LIBRARY OF NECESSARY TOOLS FOR HASH FUNCTION -- MADE BY ARI TAMSKY
+
+using System.Numerics;
+using System.Text;
 
 namespace HashDependencies
 {
@@ -45,13 +48,20 @@ namespace HashDependencies
             return (ulong)((double)(value % 1) * Math.Pow(10, numPlaces));
 		}
 
+        /// <summary>
+        /// Returns a the value inputted formatted into an array of 0s or 1s in binary
+        /// </summary>
         public static int[] GetBitList(ulong value)
         {
             int[] bitList = new int[64];
 
             for (int i = 0; i < 64; i++)
+                bitList[i] = (value & (1ul << (63 - i))) > 0 ? 1 : 0;
+
+            /* Readable version:
+            for (int i = 0; i < 64; i++)
             {
-                ulong mask = 1ul << (64 - i);
+                ulong mask = 1ul << (63 - i);
 
                 if ((value & mask) > 0)
                     bitList[i] = 1;
@@ -59,6 +69,7 @@ namespace HashDependencies
                 else
                     bitList[i] = 0;
             }
+            */
 
             return bitList;
         }
@@ -93,14 +104,14 @@ namespace HashDependencies
         }
 
         ///<summary>
-        ///The hash function, returns a tuple array of Item1: consts, Item2: initialHashVals
+        ///Setup for hash function, returns a tuple array of Item1: consts, Item2: initialHashVals
         ///</summary>
-        public static (ulong, ulong)[] Hash(string input)
+        public static (ulong, ulong)[] HashSetup(string input, bool constIHVMode = false)
         {
             char[] chars = input.ToCharArray();
 
             int popCount = 0;
-            List<int> asciiList = new();
+            byte[] asciiArr = new byte[chars.Length];
 
             ulong[] initialHashVals = new ulong[8];
             ulong[] consts = new ulong[64];
@@ -108,11 +119,11 @@ namespace HashDependencies
 
 
             //Convert characters to numbers (in bytes)
-            foreach (char c in chars)
-                asciiList.Add((int)c);
+            for (int i = 0; i < asciiArr.Length; i++)
+                asciiArr[i] = Encoding.Default.GetBytes(chars[i].ToString())[0];
 
             //Count the number of bits that are on in the input
-            foreach (int b in asciiList)
+            foreach (byte b in asciiArr)
                 popCount += BitOperations.PopCount((ulong)b);
 
             //Set the 8 initial hash values (see background research plan)
@@ -134,17 +145,23 @@ namespace HashDependencies
 
                 allVals[i - 1].Item1 = consts[i - 1];
             }
-            
-            foreach (ulong i in initialHashVals)
-                Console.WriteLine("0x" + i.ToString("X"));
 
-            Console.WriteLine();
-            Console.WriteLine("consts: ");
+            if (constIHVMode)
+            {
+                foreach (ulong i in initialHashVals)
+                    Console.WriteLine("0x" + i.ToString("X"));
 
-            foreach (ulong i in consts)
-                Console.WriteLine("0x" + i.ToString("X"));
+                Console.WriteLine();
+                Console.WriteLine("consts: ");
 
-            return allVals;
+                foreach (ulong i in consts)
+                    Console.WriteLine("0x" + i.ToString("X"));
+
+                return allVals;
+            }
+
+            //PREPROCESSING -- Blocking and stuff
+            byte[,] blocks = new byte[64, 0];
         }
     }
 }
