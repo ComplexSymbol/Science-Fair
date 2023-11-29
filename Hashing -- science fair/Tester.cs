@@ -56,23 +56,7 @@ namespace TestLibrary
 		/// </summary>
 		public static void CrackTest(int rounds, int length)
 		{
-			for (int i = 0; i < rounds; i++)
-			{
-				ulong[] initialHashVals = new ulong[8];
-				ulong[] consts = new ulong[64];
-
-				(ulong, ulong)[] currentHashReturn = Utilities.Hash(StringGenerator(length));
-
-				for (int j = 0; j < currentHashReturn.Length; j++)
-				{
-					if (j < 8)
-						initialHashVals[j] = currentHashReturn[j].Item2;
-
-					consts[j] = currentHashReturn[j].Item1;
-				}
-
-				//TODO: figure out how to reverse engineer my const and hash val generation
-			}
+			
 		}
 
 		/// <summary>
@@ -80,27 +64,17 @@ namespace TestLibrary
 		/// </summary>
 		public static void DistributionTest(int rounds, int length)
 		{
-			int[] bitCounter = new int[32];
-            ulong[] initialHashVals = new ulong[8];
-            ulong[] consts = new ulong[64];
+			int[] bitCounter = new int[64];
 
 			Console.WriteLine($"Now testing: Const distribution: (Hash) (l = {length}, r = {rounds})");
 			Console.WriteLine();
 
             for (int i = 0; i < rounds; i++)
             {
-                (ulong, ulong)[] currentHashReturn = Utilities.Hash(StringGenerator(length));
+                ulong[] currentHashReturn = Utilities.Hash(StringGenerator(length));
 
-                for (int j = 0; j < currentHashReturn.Length; j++)
-                {
-                    if (j < 8)
-                        initialHashVals[j] = currentHashReturn[j].Item2;
-
-                    consts[j] = currentHashReturn[j].Item1;
-                }
-
-				for (int j = 32; j < 64; j++)
-					bitCounter[j - 32] += Utilities.GetBitList(consts[j])[j];
+				for (int j = 0; j < currentHashReturn.Length; j++)
+					bitCounter.Zip(Utilities.GetBitList(currentHashReturn[j]));
 
                 Console.Write($"{Math.Round(((float)i / rounds) * 100, 2)}%\r");
             }
@@ -111,27 +85,16 @@ namespace TestLibrary
 
 		public static void CollisionTest(int rounds, int length)
 		{
-            ulong[] initialHashVals = new ulong[8];
-            ulong[] consts = new ulong[64];
-			uint[] duplicateDetector = new uint[64 * rounds];
+			ulong[][] duplicateDetector = new ulong[rounds][];
 
             Console.WriteLine($"Now testing: Collisions: (Hash) (l = {length}, r = {rounds})");
             Console.WriteLine();
 
             for (int i = 0; i < rounds; i++)
             {
-                (ulong, ulong)[] currentHashReturn = Utilities.Hash(StringGenerator(length));
+                ulong[] currentHashReturn = Utilities.Hash(StringGenerator(length));
 
-                for (int j = 0; j < currentHashReturn.Length; j++)
-                {
-                    if (j < 8)
-                        initialHashVals[j] = currentHashReturn[j].Item2;
-
-                    consts[j] = currentHashReturn[j].Item1;
-                }
-
-				for (int j = 0; j < 64; j++)
-					duplicateDetector[(i * 64) + j] = (uint)consts[j];
+                duplicateDetector[i] = currentHashReturn;
 
                 Console.Write($"{Math.Round(((float)i / rounds) * 100, 2)}%\r");
             }

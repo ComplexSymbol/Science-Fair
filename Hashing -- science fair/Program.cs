@@ -1,4 +1,4 @@
-﻿#define TESTING
+﻿//#define TESTING
 
 //HASHING FUNCTION FOR 2023 SCIENCE FAIR -- MADE BY ARI TAMSKY
 //VERSION 1: 11-20-23 (Wrote Input conversion)
@@ -18,8 +18,6 @@ using TestLibrary;
 
 #if TESTING
 
-Console.WriteLine((char)0xFFFF);
-
 Console.WriteLine();
 Tester.CollisionTest(1000000, 1000);
 Console.WriteLine();
@@ -36,7 +34,10 @@ while (true)
 {
     Console.Write("String to hash: ");
 
-    string str = Console.ReadLine();
+    string? str = Console.ReadLine();
+
+    if (string.IsNullOrEmpty(str))
+        throw new ArgumentException("Faulty input");
 
     Utilities.Hash(str, true);
 }

@@ -103,27 +103,35 @@ namespace HashDependencies
 			return value;
         }
 
+        public static void Print2DArray<T>(T[,] matrix)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    Console.Write(matrix[i, j] + "  ");
+                }
+                Console.WriteLine();
+            }
+        }
+
         ///<summary>
         ///Setup for hash function, returns a tuple array of Item1: consts, Item2: initialHashVals
         ///</summary>
-        public static (ulong, ulong)[] Hash(string input, bool constIHVMode = true)
+        public static ulong[] Hash(string input, bool constIHVMode = true)
         {
-            char[] chars = input.ToCharArray();
-
             int popCount = 0;
-            byte[] asciiArr = new byte[chars.Length];
-
+            char[] chars = input.ToCharArray();
+            byte[] asciiByteArr = new byte[chars.Length];
             ulong[] initialHashVals = new ulong[8];
             ulong[] consts = new ulong[64];
-            (ulong, ulong)[] allVals = new (ulong, ulong)[64];
-
 
             //Convert characters to numbers (in bytes)
-            for (int i = 0; i < asciiArr.Length; i++)
-                asciiArr[i] = Encoding.Default.GetBytes(chars[i].ToString())[0];
+            for (int i = 0; i < asciiByteArr.Length; i++)
+                asciiByteArr[i] = Encoding.Default.GetBytes(chars[i].ToString())[0];
 
             //Count the number of bits that are on in the input
-            foreach (byte b in asciiArr)
+            foreach (byte b in asciiByteArr)
                 popCount += BitOperations.PopCount((ulong)b);
 
             //Set the 8 initial hash values (see background research plan)
@@ -135,27 +143,64 @@ namespace HashDependencies
                     //Just making the values conform to 8 hex digits (simply %= 0xFFFFFFFF wouldn't work because values slightly above 0xFFFFFFF would be too small.)
                     initialHashVals[i - 1] %= 0xEFFFFFFF;
                     initialHashVals[i - 1] += 0x10000000;
-
-                    allVals[i - 1].Item2 = initialHashVals[i - 1];
                 }
 
                 consts[i - 1] = BitOperations.RotateLeft(SetBit(GetFraction((decimal)(2 * Math.Log(popCount * popCount * Math.Pow(i, 6) + 2)), 32), 1, 1), i);
                 consts[i - 1] %= 0xEFFFFFFF;
                 consts[i - 1] += 0x10000000;
-
-                allVals[i - 1].Item1 = consts[i - 1];
             }
 
-            foreach (ulong i in initialHashVals)
-                Console.WriteLine("0x" + i.ToString("X"));
+            //PREPROCESSING -- Blocking and stuff
 
-            Console.WriteLine();
-            Console.WriteLine("consts: ");
+            //Making the blocks, a block is formatted as a 2d list of words (byte, or 8 bits),
+            //where the index of the block comes first (0-based)
+            //and the index of the byte in the block comes second (0 based)
+            byte[,] blocks = new byte[(int)Math.Ceiling((float)asciiByteArr.Length / 62), 64];
 
-            foreach (ulong i in consts)
-                Console.WriteLine("0x" + i.ToString("X"));
+            //Add length words to each block
+            for (int i = 0; i < blocks.GetLength(0); i++)
+            {
+                blocks[i, 62] = (byte)((asciiByteArr.Length & 0xFF00) >>> 8);
+                blocks[i, 63] = (byte) (asciiByteArr.Length & 0x00FF);
+            }
 
-            return allVals;
+            //Fill blocks
+            int count = 0;
+            for (int i = 0; i < blocks.GetLength(0); i++)
+            {
+                for (int f = 0; f < blocks.GetLength(1) - 2; f++)
+                {
+                    if (count < asciiByteArr.Length)
+                    {
+                        blocks[i, f] = asciiByteArr[count];
+                        count++;
+                    }
+                }
+            }
+
+            //Append 1
+            for (int i = 0; i < blocks.GetLength(0); i++)
+            {
+                for (int f = 0; f < blocks.GetLength(1) - 2; f++)
+                {
+                    if (blocks[i, f] == 0 && f < 62)
+                    {
+                        blocks[i, f] = 1;
+                        break;
+                    }
+
+                    else if (f >= 62)
+                    {
+                        blocks[i, 61] <<= 1;
+                        blocks[i, 61] += 1;
+                    }
+                }
+            }
+
+
+            Print2DArray(blocks);
+
+            return null;
         }
     }
 }
