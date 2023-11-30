@@ -34,10 +34,7 @@ while (true)
 {
     Console.Write("String to hash: ");
 
-    string? str = Console.ReadLine();
-
-    if (string.IsNullOrEmpty(str))
-        throw new ArgumentException("Faulty input");
+    string str = Console.ReadLine();
 
     Utilities.Hash(str, true);
 }
