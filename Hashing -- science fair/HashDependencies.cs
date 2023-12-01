@@ -13,7 +13,7 @@ namespace HashDependencies
 
     public class Utilities
     {
-        private static uint[] consts12 = new uint[0];
+        private static ulong[] consts12;
 
         ///<summary>
         ///Returns the first n bits in a ulong
@@ -43,48 +43,30 @@ namespace HashDependencies
         ///<summary>
         ///Returns the fraction part of a decimal (in ulong format)
         ///</summary>
-        public static ulong GetFraction(decimal value, int n = 64)
-		{
-			decimal v = value;
+        public static ulong GetFraction(decimal value, int n = 64) =>
+             (ulong)((double)(value % 1) * Math.Pow(10, GetDecimalPlaces(value)));
 
-            int numPlaces = GetDecimalPlaces(v);
-
-            return (ulong)((double)(value % 1) * Math.Pow(10, numPlaces));
-		}
 
         /// <summary>
         /// Returns a the value inputted formatted into an array of 0s or 1s in binary
         /// </summary>
-        public static int[] GetBitList(ulong value)
+        public static int[] GetBitList(BigInteger value)
         {
-            int[] bitList = new int[64];
+            int[] bitList = new int[value.GetBitLength()];
 
-            for (int i = 0; i < 64; i++)
-                bitList[i] = (value & (1ul << (63 - i))) > 0 ? 1 : 0;
-
-            /* Readable version:
-            for (int i = 0; i < 64; i++)
-            {
-                ulong mask = 1ul << (63 - i);
-
-                if ((value & mask) > 0)
-                    bitList[i] = 1;
-
-                else
-                    bitList[i] = 0;
-            }
-            */
+            for (int i = 0; i < bitList.Length; i++)
+                bitList[i] = (value & (1ul << (bitList.Length - 1 - i))) > 0 ? 1 : 0;
 
             return bitList;
         }
 
-		///<summary>
-		///Sets the nth bit of a ulong to off (0), on (1), or toggle (2)
-		///</summary>
-		public static ulong SetBit(ulong value, int n, int setting)
-		{
-			if (n > 64)
-				throw new ArgumentException("Arguement 'n' is larger than the amount of bits supported by a ulong");
+        ///<summary>
+        ///Sets the nth bit of a ulong to off (0), on (1), or toggle (2)
+        ///</summary>
+        public static ulong SetBit(ulong value, int n, int setting)
+        {
+            if (n > 64)
+                throw new ArgumentException("Arguement 'n' is larger than the amount of bits supported by a ulong");
 
             if (setting is not (0 or 1 or 2)) //Setting is not a valid option
                 throw new ArgumentException("Arguement 'setting' is not a valid option (0, 1, or 2 are the valid options for 'setting')");
@@ -92,21 +74,24 @@ namespace HashDependencies
             //bit n in a ulong
             ulong mask = BitOperations.RotateRight(1ul, n);
 
-			//If value contains bit n and setting equals off, turn bit off
-			if (value >= mask && setting == 0)
-				return value - mask;
+            //If value contains bit n and setting equals off, turn bit off
+            if (value >= mask && setting == 0)
+                return value - mask;
 
-			//If value does not contain bit n and setting equals on, turn bit on
-			else if (value < mask && setting == 1)
-				return value + mask;
+            //If value does not contain bit n and setting equals on, turn bit on
+            else if (value < mask && setting == 1)
+                return value + mask;
 
             //If the setting is toggle
             else if (setting == 2)
                 return value ^ mask;
 
-			return value;
+            return value;
         }
 
+        ///<summary>
+        ///Returns the sum of the inputs modded to the uint max value 
+        ///</summary>
         public static uint AdditionMod32(uint a, uint b, uint c = 0, uint d = 0, uint e = 0)
         {
             ulong A = a;
@@ -116,21 +101,6 @@ namespace HashDependencies
             ulong E = e;
 
             return (uint)((((((((A + B) % uint.MaxValue) + C) % uint.MaxValue) + D) % uint.MaxValue) + E) % uint.MaxValue);
-        }
-
-        /// <summary>
-        /// Writes the contents of a 2d array to the console
-        /// </summary>
-        public static void Print2DArray<T>(T[,] matrix)
-        {
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                {
-                    Console.Write(matrix[i, j] + "  ");
-                }
-                Console.WriteLine();
-            }
         }
 
         /// <summary>
@@ -145,22 +115,22 @@ namespace HashDependencies
             switch (setting)
             {
                 case 1: //Ch
-                    return (x & y) ^ (~x & z); 
+                    return (x & y) ^ (~x & z);
 
                 case 2: //Maj
                     return (x & y) ^ (x & z) ^ (y & z);
 
                 case 3: //S0
-                    return BitOperations.RotateRight(x, (int)(consts12[1] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[2] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[3] % 32));
+                    return BitOperations.RotateRight(x, (int)(consts12[0] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[1] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[2] % 32));
 
                 case 4: //S1
-                    return BitOperations.RotateRight(x, (int)(consts12[4] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[5] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[6] % 32));
+                    return BitOperations.RotateRight(x, (int)(consts12[3] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[4] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[5] % 32));
 
                 case 5: //s0
-                    return BitOperations.RotateRight(x, (int)(consts12[7] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[8] % 32)) ^ (x >> (int)(consts12[9] % 32));
+                    return BitOperations.RotateRight(x, (int)(consts12[6] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[7] % 32)) ^ (x >> (int)(consts12[8] % 32));
 
                 case 6: //s1
-                    return BitOperations.RotateRight(x, (int)(consts12[10] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[11] % 32)) ^ (x >> (int)(consts12[12] % 32));
+                    return BitOperations.RotateRight(x, (int)(consts12[9] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[10] % 32)) ^ (x >> (int)(consts12[11] % 32));
 
                 default: //Not a valid setting
                     throw new ArgumentException($"Illegal input setting of '{setting}' (setting range: 1-6)");
@@ -170,7 +140,7 @@ namespace HashDependencies
         ///<summary>
         ///Setup for hash function, returns a tuple array of Item1: consts, Item2: initialHashVals
         ///</summary>
-        public static ulong[] Hash(string input, bool constIHVMode = true)
+        public static BigInteger Hash(string input, bool constIHVMode = true)
         {
             //HASH SETUP -- consts, IHV, formatting
 
@@ -195,13 +165,13 @@ namespace HashDependencies
                 {
                     initialHashVals[i - 1] = BitOperations.RotateLeft(SetBit(GetFraction((decimal)(2 * Math.Log(popCount * popCount * Math.Pow(i, 5) + 2)), 32), 1, 1), i);
                     //Just making the values conform to 8 hex digits (simply %= 0xFFFFFFFF wouldn't work because values slightly above 0xFFFFFFF would be too small.)
-                    initialHashVals[i - 1] %= 0xEFFFFFFF;
-                    initialHashVals[i - 1] += 0x10000000;
+                    initialHashVals[i - 1] %= 0x7FFFFFFF;
+                    initialHashVals[i - 1] += 0x80000000;
                 }
 
                 consts[i - 1] = BitOperations.RotateLeft(SetBit(GetFraction((decimal)(2 * Math.Log(popCount * popCount * Math.Pow(i, 6) + 2)), 32), 1, 1), i);
-                consts[i - 1] %= 0xEFFFFFFF;
-                consts[i - 1] += 0x10000000;
+                consts[i - 1] %= 0x7FFFFFFF;
+                consts[i - 1] += 0x80000000;
             }
 
             //PREPROCESSING -- Blocking
@@ -213,50 +183,43 @@ namespace HashDependencies
             //an array of ints later on.
             byte[,] blocksAsBytes = new byte[(int)Math.Ceiling((float)asciiByteArr.Length / 62), 64];
 
-            //Add length words to each block
-            for (int i = 0; i < blocksAsBytes.GetLength(0); i++)
-            {
-                blocksAsBytes[i, 62] = (byte)((asciiByteArr.Length & 0xFF00) >>> 8);
-                blocksAsBytes[i, 63] = (byte) (asciiByteArr.Length & 0x00FF);
-            }
-
             //Fill blocks
             int count = 0;
             for (int i = 0; i < blocksAsBytes.GetLength(0); i++)
             {
+                bool found = false;
+
+                //Add length words to each block
+                blocksAsBytes[i, 62] = (byte)((asciiByteArr.Length & 0xFF00) >>> 8);
+                blocksAsBytes[i, 63] = (byte)(asciiByteArr.Length & 0x00FF);
+
                 for (int f = 0; f < blocksAsBytes.GetLength(1) - 2; f++)
                 {
+                    //Fill:
                     if (count < asciiByteArr.Length)
                     {
                         blocksAsBytes[i, f] = asciiByteArr[count];
                         count++;
                     }
-                }
-            }
 
-            //Append 1
-            for (int i = 0; i < blocksAsBytes.GetLength(0); i++)
-            {
-                for (int f = 0; f < blocksAsBytes.GetLength(1) - 2; f++)
-                {
+                    //Append 1: 
                     //Block is full
-                    if (f >= 62)
+                    if (f >= 62 && !found)
                     {
                         blocksAsBytes[i, 61] <<= 1;
                         blocksAsBytes[i, 61] += 1;
-                        break;
+                        found = true;
                     }
 
                     //Find first word that is empty
-                    else if (blocksAsBytes[i, f] == 0)
+                    else if (blocksAsBytes[i, f] == 0 && !found)
                     {
                         blocksAsBytes[i, f] = 1;
-                        break;
+                        found = true;
                     }
                 }
             }
 
-            Print2DArray(blocksAsBytes);
 
             //HASH GENERATION -- Merkle Damgard Construction
 
@@ -270,9 +233,11 @@ namespace HashDependencies
 
             uint[,] blocks = new uint[blocksAsBytes.GetLength(0), 16];
 
-            for (int i = 0; i < blocksAsBytes.GetLength(1); i++)
+            consts12 = consts[0..12];
+
+            for (int i = 0; i < blocksAsBytes.GetLength(0); i++)
             {
-                for (int f = 0; f < blocksAsBytes.GetLength(1); i += 4)
+                for (int f = 0; f < blocksAsBytes.GetLength(1); f += 8)
                 {
                     uint temp = 0;
 
@@ -288,37 +253,31 @@ namespace HashDependencies
                     temp += blocksAsBytes[i, f + 3];
                     temp <<= 4;
 
-                    blocks[i, f / 4] = temp;
+                    blocks[i, f / 8] = temp;
                 }
             }
 
-            uint[,] intermediateHVs = new uint[8, blocks.GetLength(0)];
+            uint[,] intermediateHVs = new uint[8, blocks.GetLength(0) + 1];
 
             for (int i = 0; i < initialHashVals.Length; i++)
                 intermediateHVs[i, 0] = (uint)initialHashVals[i];
 
+            uint W(int t, int i)
+            {
+                if (0 <= t && t <= 15)
+                    return blocks[i, t];
+
+                else if (16 <= t && t <= 64)
+                    return AdditionMod32(Functions(6, W(t - 2, i)),
+                                         W(t - 7, i),
+                                         Functions(5, W(t - 15, i)),
+                                         W(t - 16, i));
+                else
+                    throw new ArgumentException($"Arguement 't' must be between 0 and 64. (t = {t})");
+            }
 
             for (int i = 0; i < blocks.GetLength(0); i++)
             {
-                consts12 = consts[0..12].Select(item => (uint)item).ToArray();
-
-                //Prepare message schedule
-                uint W(int t)
-                {
-                    if (0 <= t && t <= 15)
-                        return blocks[i, t];
-
-                    else if (16 <= t && t <= 64)
-                        return AdditionMod32(
-                                        Functions(6, W(t - 2)),
-                                        W(t - 7),
-                                        Functions(5, W(t - 15)),
-                                        W(t - 16));
-                    else
-                        throw new ArgumentException($"Arguement 't' must be between 0 and 64. (t = {t})");
-                }
-
-
                 //Initialize working variables
 
                 uint a = intermediateHVs[0, i];
@@ -333,7 +292,7 @@ namespace HashDependencies
                 //Calculate
                 for (int t = 0; t < 64; t++)
                 {
-                    uint T_1 = AdditionMod32(h, Functions(4, e), Functions(1, e, f, g), (uint)consts[t], W(t));
+                    uint T_1 = AdditionMod32(h, Functions(4, e), Functions(1, e, f, g), (uint)consts[t], W(t, i));
                     uint T_2 = AdditionMod32(Functions(5, a), Functions(2, a, b, c));
 
                     h = g;
@@ -347,11 +306,28 @@ namespace HashDependencies
                 }
 
                 //Compute intermediate hash values
-                
+
+                for (int t = 0; t < 8; t++)
+                    intermediateHVs[t, i + 1] = AdditionMod32(a, intermediateHVs[t, i]);
+            }
+            
+            BigInteger output = 0;
+
+            for (int i = 0; i < 8; i++)
+            {
+                output += intermediateHVs[i, intermediateHVs.GetLength(1) - 1];
+                output <<= 32;
             }
 
-            return null;
+            //64 f's 256 bits
+            //0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            output %= BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819967");
+
+            //0x8000000000000000000000000000000000000000000000000000000000000000
+            //1 followed by 255 0's in binary
+            output += BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819968");
+
+            return output;
         }
     }
 }
-

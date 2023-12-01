@@ -2,6 +2,7 @@
 
 using HashDependencies;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace TestLibrary
 {
@@ -64,17 +65,16 @@ namespace TestLibrary
 		/// </summary>
 		public static void DistributionTest(int rounds, int length)
 		{
-			int[] bitCounter = new int[64];
+			int[] bitCounter = new int[256];
 
 			Console.WriteLine($"Now testing: Const distribution: (Hash) (l = {length}, r = {rounds})");
 			Console.WriteLine();
 
             for (int i = 0; i < rounds; i++)
             {
-                ulong[] currentHashReturn = Utilities.Hash(StringGenerator(length));
+                BigInteger currentHashReturn = Utilities.Hash(StringGenerator(length));
 
-				for (int j = 0; j < currentHashReturn.Length; j++)
-					bitCounter.Zip(Utilities.GetBitList(currentHashReturn[j]));
+				bitCounter = bitCounter.Zip(Utilities.GetBitList(currentHashReturn), (x, y) => x + y).ToArray<int>();
 
                 Console.Write($"{Math.Round(((float)i / rounds) * 100, 2)}%\r");
             }
@@ -85,23 +85,23 @@ namespace TestLibrary
 
 		public static void CollisionTest(int rounds, int length)
 		{
-			ulong[][] duplicateDetector = new ulong[rounds][];
+			int[] duplicateDetector = new int[rounds];
 
             Console.WriteLine($"Now testing: Collisions: (Hash) (l = {length}, r = {rounds})");
             Console.WriteLine();
 
             for (int i = 0; i < rounds; i++)
             {
-                ulong[] currentHashReturn = Utilities.Hash(StringGenerator(length));
+                BigInteger currentHashReturn = Utilities.Hash(StringGenerator(length));
 
-                duplicateDetector[i] = currentHashReturn;
+				duplicateDetector.Zip(Utilities.GetBitList(currentHashReturn));
 
                 Console.Write($"{Math.Round(((float)i / rounds) * 100, 2)}%\r");
             }
 
 			int error = duplicateDetector.Length - duplicateDetector.Distinct().Count();
 
-            Console.WriteLine($"Test Complete. Results: {error} collisions found ({Math.Round((decimal)error / (rounds * 64), 2)}% of outputs are duplicates)");
+            Console.WriteLine($"Test Complete. Results: {error} collisions found ({Math.Round((decimal)error / (rounds), 2)}% of outputs are duplicates)");
         }
 	}
 }
