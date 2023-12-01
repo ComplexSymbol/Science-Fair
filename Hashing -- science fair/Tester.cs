@@ -73,7 +73,6 @@ namespace TestLibrary
             for (int i = 0; i < rounds; i++)
             {
                 BigInteger currentHashReturn = Utilities.Hash(StringGenerator(length));
-
 				bitCounter = bitCounter.Zip(Utilities.GetBitList(currentHashReturn), (x, y) => x + y).ToArray<int>();
 
                 Console.Write($"{Math.Round(((float)i / rounds) * 100, 2)}%\r");
@@ -85,16 +84,25 @@ namespace TestLibrary
 
 		public static void CollisionTest(int rounds, int length)
 		{
-			int[] duplicateDetector = new int[rounds];
+			BigInteger[] duplicateDetector = new BigInteger[rounds];
+			string[] stringDuplicates = new string[rounds];
 
             Console.WriteLine($"Now testing: Collisions: (Hash) (l = {length}, r = {rounds})");
             Console.WriteLine();
 
             for (int i = 0; i < rounds; i++)
             {
-                BigInteger currentHashReturn = Utilities.Hash(StringGenerator(length));
+NewString:
+				string currentTestString = StringGenerator(length);
 
-				duplicateDetector.Zip(Utilities.GetBitList(currentHashReturn));
+				if (stringDuplicates.Contains(currentTestString))
+					goto NewString;
+
+				stringDuplicates[i] = currentTestString; 
+
+
+                BigInteger currentHashReturn = Utilities.Hash(currentTestString);
+				duplicateDetector[i] = Utilities.Hash(currentTestString);
 
                 Console.Write($"{Math.Round(((float)i / rounds) * 100, 2)}%\r");
             }

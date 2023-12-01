@@ -19,11 +19,11 @@ using TestLibrary;
 #if TESTING
 
 Console.WriteLine();
-//Tester.TimeTest(100, 1000);
+Tester.TimeTest(10000, 1000);
 Console.WriteLine();
-//Tester.CollisionTest(100, 1000);
+Tester.CollisionTest(10000, 1000);
 Console.WriteLine();
-Tester.DistributionTest(100, 1000);
+Tester.DistributionTest(10000, 1000);
 Console.WriteLine();
 
 #endif

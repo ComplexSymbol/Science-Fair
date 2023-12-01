@@ -8,4 +8,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="HashDependencies.cs.orig" />
+  </ItemGroup>
 </Project>
