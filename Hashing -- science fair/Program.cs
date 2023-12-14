@@ -1,5 +1,4 @@
-﻿#define TESTING
-
+﻿
 //HASHING FUNCTION FOR 2023 SCIENCE FAIR -- MADE BY ARI TAMSKY
 //VERSION 1: 11-20-23 (Wrote Input conversion)
 //VERSION 2: 11-23-23 (Wrote Library, wrote IHV and const generation)
@@ -15,27 +14,42 @@ using System.Numerics;
 using HashDependencies;
 using TestLibrary;
 
+static void Test()
+{
+    Console.WriteLine();
+    Console.Write("Enter number of rounds (10000 recommended): ");
 
-#if TESTING
+    int rounds = int.Parse(Console.ReadLine());
 
-Console.WriteLine();
-Tester.TimeTest(10000, 1000);
-Console.WriteLine();
-Tester.CollisionTest(10000, 1000);
-Console.WriteLine();
-Tester.DistributionTest(10000, 1000);
-Console.WriteLine();
+    Console.WriteLine();
+    Tester.AllTests(rounds);
+    Console.WriteLine();
 
-#endif
+    Console.WriteLine("Test Complete!");
 
+    return;
+}
 
-#if !TESTING
+Console.WriteLine("You are running Ari's Hash Function! If you wish to exit, simply type \"I COMMAND EXIT\". If you wish to enter test mode type \"I COMMAND TEST\".");
+
 while (true)
 {
-    Console.Write("String to hash: ");
+    Console.Write("String to hash [type and then press enter]: ");
 
     string str = Console.ReadLine();
 
-    Console.WriteLine(Utilities.Hash(str, true).ToString("X").TrimStart('0'));
+    switch (str.ToUpper())
+    {
+        case "I COMMAND EXIT":
+            return;
+
+        case "I COMMAND TEST":
+            Test();
+            break;
+    }
+
+    BigInteger hash = Utilities.Hash(str);
+
+    Console.WriteLine(hash.ToString("X").TrimStart('0'));
+    Console.WriteLine();
 }
-#endif

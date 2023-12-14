@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Text;
 
 
+
 namespace HashDependencies
 {
     ///<summary>
@@ -13,7 +14,7 @@ namespace HashDependencies
 
     public class Utilities
     {
-        private static ulong[] consts12;
+        private static uint[] consts12;
 
         ///<summary>
         ///Returns the first n bits in a ulong
@@ -21,16 +22,11 @@ namespace HashDependencies
         public static ulong GetBits(ulong value, int n, bool ignoreLeading0Count = false) =>
             value >>> (64 - (ignoreLeading0Count ? 0 : BitOperations.LeadingZeroCount(value)) - n);
 
-        ///<summary>
-        ///Returns the number of decimal places in a number
-        ///</summary>        
         public static int GetDecimalPlaces(decimal n)
         {
             n = Math.Abs(n); //make sure it is positive.
             n -= (int)n;     //remove the integer part of the number.
-
             var decimalPlaces = 0;
-
             while (n > 0)
             {
                 decimalPlaces++;
@@ -42,10 +38,33 @@ namespace HashDependencies
 
         ///<summary>
         ///Returns the fraction part of a decimal (in ulong format)
-        ///</summary>
-        public static ulong GetFraction(decimal value, int n = 64) =>
-             (ulong)((double)(value % 1) * Math.Pow(10, GetDecimalPlaces(value)));
+        ///</summary>       
+        public static ulong GetFraction(decimal n)
+        {
+            n = Math.Abs(n); //make sure it is positive.
+            n -= (int)n;     //remove the integer part of the number.
 
+            ulong result = 0;
+
+            while (n > 0)
+            {
+                if (GetDecimalPlaces(n) > 19)
+                {
+                    n *= 10;
+                    n %= 1m;
+
+                    continue;
+                }
+
+                n *= 10;
+                result *= 10;
+
+                result += (ulong)n;
+                n %= 1m;
+            }
+            
+            return result;
+        }
 
         /// <summary>
         /// Returns a the value inputted formatted into an array of 0s or 1s in binary
@@ -55,11 +74,11 @@ namespace HashDependencies
             int[] bitList = new int[value.GetBitLength()];
 
             for (int i = 0; i < bitList.Length; i++)
-                bitList[i] = (value & (1ul << (bitList.Length - 1 - i))) > 0 ? 1 : 0;
+                bitList[i] = (value & ((BigInteger)1ul << (bitList.Length - 1 - i))) > 0 ? 1 : 0;
 
             return bitList;
         }
-
+         
         ///<summary>
         ///Sets the nth bit of a ulong to off (0), on (1), or toggle (2)
         ///</summary>
@@ -112,66 +131,102 @@ namespace HashDependencies
             if (consts12.Length < 12)
                 throw new ArgumentException($"Length of array arguement 'consts' must be greater than or equal to 12 ({consts12.Length} < 12)");
 
-            switch (setting)
+            return setting switch
             {
-                case 1: //Ch
-                    return (x & y) ^ (~x & z);
+                //Ch
+                1 => (x & y) ^ (~x & z),
+                //Maj
+                2 => (x & y) ^ (x & z) ^ (y & z),
+                //S0
+                3 => BitOperations.RotateRight(x, (int)(consts12[0] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[1] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[2] % 32)),
+                //S1
+                4 => BitOperations.RotateRight(x, (int)(consts12[3] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[4] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[5] % 32)),
+                //s0
+                5 => BitOperations.RotateRight(x, (int)(consts12[6] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[7] % 32)) ^ (x >> (int)(consts12[8] % 32)),
+                //s1
+                6 => BitOperations.RotateRight(x, (int)(consts12[9] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[10] % 32)) ^ (x >> (int)(consts12[11] % 32)),
+                //Not a valid setting
+                _ => throw new ArgumentException($"Illegal input setting of '{setting}' (setting range: 1-6)"),
+            };
+        }
 
-                case 2: //Maj
-                    return (x & y) ^ (x & z) ^ (y & z);
+        public static uint BytesToUint(byte b1, byte b2, byte b3, byte b4)
+        {
+            uint B1 = b1;
+            uint B2 = b2;
+            uint B3 = b3;
+            uint B4 = b4;
 
-                case 3: //S0
-                    return BitOperations.RotateRight(x, (int)(consts12[0] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[1] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[2] % 32));
+            return (B1 << 24) | (B2 << 16) | (B3 << 8) | B4;
+        }
 
-                case 4: //S1
-                    return BitOperations.RotateRight(x, (int)(consts12[3] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[4] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[5] % 32));
-
-                case 5: //s0
-                    return BitOperations.RotateRight(x, (int)(consts12[6] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[7] % 32)) ^ (x >> (int)(consts12[8] % 32));
-
-                case 6: //s1
-                    return BitOperations.RotateRight(x, (int)(consts12[9] % 32)) ^ BitOperations.RotateRight(x, (int)(consts12[10] % 32)) ^ (x >> (int)(consts12[11] % 32));
-
-                default: //Not a valid setting
-                    throw new ArgumentException($"Illegal input setting of '{setting}' (setting range: 1-6)");
+        public static void Print2DArray(uint[,] matrix)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    Console.Write(Convert.ToString(matrix[i, j], 2) + " ");
+                }
+                Console.WriteLine();
             }
         }
 
         ///<summary>
         ///Setup for hash function, returns a tuple array of Item1: consts, Item2: initialHashVals
         ///</summary>
-        public static BigInteger Hash(string input, bool constIHVMode = true)
+        public static BigInteger Hash(string input)
         {
             //HASH SETUP -- consts, IHV, formatting
 
             int popCount = 0;
             char[] chars = input.ToCharArray();
             byte[] asciiByteArr = new byte[chars.Length];
-            ulong[] initialHashVals = new ulong[8];
-            ulong[] consts = new ulong[64];
+            uint[] initialHashVals = new uint[8];
+            uint[] consts = new uint[64];
+            uint identifier = 0xFFFFFFFF;
 
             //Convert characters to numbers (in bytes)
             for (int i = 0; i < asciiByteArr.Length; i++)
-                asciiByteArr[i] = Encoding.Default.GetBytes(chars[i].ToString())[0];
+                asciiByteArr[i] = Encoding.UTF8.GetBytes(chars[i].ToString())[0];
 
             //Count the number of bits that are on in the input
             foreach (byte b in asciiByteArr)
+            {
                 popCount += BitOperations.PopCount((ulong)b);
 
-            //Set the 8 initial hash values (see background research plan)
+                identifier ^= b;
+                identifier = (BitOperations.RotateLeft(identifier, 8)) ^ b;
+                identifier = (BitOperations.RotateLeft(identifier, 8)) ^ b;
+                identifier = (BitOperations.RotateLeft(identifier, 8)) ^ b;
+                identifier = BitOperations.RotateRight(identifier, b);
+            }
+
+            //Set the 8 initial hash values and consts (see background research plan) (setting consts down here because
+            //there are values generated right before this that are necessary to const generation)
             for (int i = 1; i < 65; i++)
             {
+                ulong temp;
+
                 if (i - 1 < 8)
                 {
-                    initialHashVals[i - 1] = BitOperations.RotateLeft(SetBit(GetFraction((decimal)(2 * Math.Log(popCount * popCount * Math.Pow(i, 5) + 2)), 32), 1, 1), i);
-                    //Just making the values conform to 8 hex digits (simply %= 0xFFFFFFFF wouldn't work because values slightly above 0xFFFFFFF would be too small.)
-                    initialHashVals[i - 1] %= 0x7FFFFFFF;
-                    initialHashVals[i - 1] += 0x80000000;
+                    temp = GetFraction((decimal)Math.Abs(Math.Log(((double)popCount * popCount * identifier * (i * i * i) / (popCount << (i % 8))) + 2)));
+                    temp %= 0x7FFFFFFF;
+                    temp += 0x80000000;
+
+                    initialHashVals[i - 1] = (uint)temp ^ (i > 1 ? initialHashVals[i - 2] : 0) ^ identifier;
                 }
 
-                consts[i - 1] = BitOperations.RotateLeft(SetBit(GetFraction((decimal)(2 * Math.Log(popCount * popCount * Math.Pow(i, 6) + 2)), 32), 1, 1), i);
-                consts[i - 1] %= 0x7FFFFFFF;
-                consts[i - 1] += 0x80000000;
+                temp = GetFraction((decimal)Math.Abs(Math.Log(((double)popCount * popCount * identifier * i * i / (popCount << (i % 8))) + 2)));
+                temp %= 0x7FFFFFFF;
+                temp += 0x80000000;
+
+                consts[i - 1] = (uint)temp;
+
+                if (i > 1)
+                    consts[i - 1] ^= consts[(popCount & identifier) % (i - 1)] ^ (i > 1 ? consts[i - 2] : 0) ^ identifier;
+
+                identifier ^= consts[i - 1] ^ initialHashVals[Math.Min(i - 1, 7)];
             }
 
             //PREPROCESSING -- Blocking
@@ -183,43 +238,8 @@ namespace HashDependencies
             //an array of ints later on.
             byte[,] blocksAsBytes = new byte[(int)Math.Ceiling((float)asciiByteArr.Length / 62), 64];
 
-            //Fill blocks
-            int count = 0;
-            for (int i = 0; i < blocksAsBytes.GetLength(0); i++)
-            {
-                bool found = false;
-
-                //Add length words to each block
-                blocksAsBytes[i, 62] = (byte)((asciiByteArr.Length & 0xFF00) >>> 8);
-                blocksAsBytes[i, 63] = (byte)(asciiByteArr.Length & 0x00FF);
-
-                for (int f = 0; f < blocksAsBytes.GetLength(1) - 2; f++)
-                {
-                    //Fill:
-                    if (count < asciiByteArr.Length)
-                    {
-                        blocksAsBytes[i, f] = asciiByteArr[count];
-                        count++;
-                    }
-
-                    //Append 1: 
-                    //Block is full
-                    if (f >= 62 && !found)
-                    {
-                        blocksAsBytes[i, 61] <<= 1;
-                        blocksAsBytes[i, 61] += 1;
-                        found = true;
-                    }
-
-                    //Find first word that is empty
-                    else if (blocksAsBytes[i, f] == 0 && !found)
-                    {
-                        blocksAsBytes[i, f] = 1;
-                        found = true;
-                    }
-                }
-            }
-
+            //Blocks as a uint array (same indexing rules as before)
+            uint[,] blocks = new uint[blocksAsBytes.GetLength(0), 16];
 
             //HASH GENERATION -- Merkle Damgard Construction
 
@@ -230,37 +250,6 @@ namespace HashDependencies
             //S1: 4
             //s0: 5
             //s1: 6
-
-            uint[,] blocks = new uint[blocksAsBytes.GetLength(0), 16];
-
-            consts12 = consts[0..12];
-
-            for (int i = 0; i < blocksAsBytes.GetLength(0); i++)
-            {
-                for (int f = 0; f < blocksAsBytes.GetLength(1); f += 8)
-                {
-                    uint temp = 0;
-
-                    temp += blocksAsBytes[i, f];
-                    temp <<= 4;
-
-                    temp += blocksAsBytes[i, f + 1];
-                    temp <<= 4;
-
-                    temp += blocksAsBytes[i, f + 2];
-                    temp <<= 4;
-
-                    temp += blocksAsBytes[i, f + 3];
-                    temp <<= 4;
-
-                    blocks[i, f / 8] = temp;
-                }
-            }
-
-            uint[,] intermediateHVs = new uint[8, blocks.GetLength(0) + 1];
-
-            for (int i = 0; i < initialHashVals.Length; i++)
-                intermediateHVs[i, 0] = (uint)initialHashVals[i];
 
             uint W(int t, int i)
             {
@@ -276,10 +265,57 @@ namespace HashDependencies
                     throw new ArgumentException($"Arguement 't' must be between 0 and 64. (t = {t})");
             }
 
-            for (int i = 0; i < blocks.GetLength(0); i++)
-            {
-                //Initialize working variables
+            consts12 = consts[0..12];
 
+            uint[,] intermediateHVs = new uint[8, blocks.GetLength(0) + 1];
+
+            for (int i = 0; i < initialHashVals.Length; i++)
+                intermediateHVs[i, 0] = initialHashVals[i];
+
+            for (int i = 0, count = 0; i < blocksAsBytes.GetLength(0); i++)
+            {
+                bool found = false;
+
+                //Add length words to each block
+                blocksAsBytes[i, 62] = (byte)((asciiByteArr.Length & 0xFF00) >>> 8);
+                blocksAsBytes[i, 63] = (byte)(asciiByteArr.Length & 0x00FF);
+
+                for (int t = 0; t < 64; t++)
+                {
+                    //Fill:
+                    if (count < asciiByteArr.Length)
+                    {
+                        blocksAsBytes[i, t] = asciiByteArr[count];
+                        count++;
+                    }
+
+                    //Append 1: 
+                    //Block is full
+                    if (t >= 62 && !found)
+                    {
+                        blocksAsBytes[i, 61] <<= 1;
+                        blocksAsBytes[i, 61] += 1;
+                        found = true;
+                    }
+
+                    //Find first word that is emptye
+                    else if (blocksAsBytes[i, t] == 0 && !found)
+                    {
+                        blocksAsBytes[i, t] = 1;
+                        found = true;
+                    }
+                }
+
+                for (int t = 0; t < 16; t++)
+                {
+                    //Fill blocks (as uint)
+                    blocks[i, t] = BytesToUint(blocksAsBytes[i, (t * 4) + 0],
+                                               blocksAsBytes[i, (t * 4) + 1],
+                                               blocksAsBytes[i, (t * 4) + 2],
+                                               blocksAsBytes[i, (t * 4) + 3]);
+                }
+
+                //Initialize working variables
                 uint a = intermediateHVs[0, i];
                 uint b = intermediateHVs[1, i];
                 uint c = intermediateHVs[2, i];
@@ -292,40 +328,52 @@ namespace HashDependencies
                 //Calculate
                 for (int t = 0; t < 64; t++)
                 {
-                    uint T_1 = AdditionMod32(h, Functions(4, e), Functions(1, e, f, g), (uint)consts[t], W(t, i));
+                    uint T_1 = AdditionMod32(h, Functions(4, e), Functions(1, e, f, g), consts[t], W(t, i));
                     uint T_2 = AdditionMod32(Functions(5, a), Functions(2, a, b, c));
 
                     h = g;
                     g = f;
                     f = e;
-                    e = d + T_1;
+                    e = AdditionMod32(d, T_1);
                     d = c;
                     c = b;
                     b = a;
-                    a = T_1 + T_2;
+                    a = AdditionMod32(T_1, T_2);
                 }
 
                 //Compute intermediate hash values
-
-                for (int t = 0; t < 8; t++)
-                    intermediateHVs[t, i + 1] = AdditionMod32(a, intermediateHVs[t, i]);
+                for (int j = 0; j < 8; j++)
+                    intermediateHVs[j, i + 1] = AdditionMod32(a, intermediateHVs[j, i]);
             }
-            
+
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            foreach (uint c in consts)
+            {
+                Console.WriteLine(Convert.ToString(c, 2));
+            }
+
+            Print2DArray(intermediateHVs);
+            Console.WriteLine();
+
             BigInteger output = 0;
 
             for (int i = 0; i < 8; i++)
             {
-                output += intermediateHVs[i, intermediateHVs.GetLength(1) - 1];
+                Console.WriteLine(Convert.ToString(intermediateHVs[i, intermediateHVs.GetLength(1) - 1], 2));
                 output <<= 32;
+                output += intermediateHVs[i, intermediateHVs.GetLength(1) - 1];
             }
 
-            //64 f's 256 bits
-            //0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            output %= BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819967");
+            //0 followed by 255 1's in binary
+            //output %= BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819967");
 
-            //0x8000000000000000000000000000000000000000000000000000000000000000
             //1 followed by 255 0's in binary
-            output += BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819968");
+            //output += BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819968");
+
+            Console.WriteLine(string.Join("", GetBitList(output)));
 
             return output;
         }
