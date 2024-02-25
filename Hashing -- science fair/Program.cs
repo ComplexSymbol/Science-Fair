@@ -1,16 +1,4 @@
-﻿
-//HASHING FUNCTION FOR 2023 SCIENCE FAIR -- MADE BY ARI TAMSKY
-//VERSION 1: 11-20-23 (Wrote Input conversion)
-//VERSION 2: 11-23-23 (Wrote Library, wrote IHV and const generation)
-//VERSION 3: 11-24-23 (Improved Library, improved IHV and const generation)
-//VERSION 4: 11-25-23 (Improved Library, finished IHV and const generation)
-//VERSION 5: 11-25-23 (Improved Library, fixed edgecase scenarios, wrote a hash timer, started a hash cracker, wrote a random string generator, started GitHub for project)
-//VERSION 6: 11-26-23 (Improved Library, wrote a bit distribution test, reformatted Program and HashDependencies)
-
-//TODO: make the individual hash functions
-//TODO: make a hash cracker
-
-using System.Numerics;
+﻿using System.Numerics;
 using HashDependencies;
 using TestLibrary;
 
@@ -22,34 +10,44 @@ static void Test()
     int rounds = int.Parse(Console.ReadLine());
 
     Console.WriteLine();
-    Tester.AllTests(rounds);
+    //Tester.AllTests(rounds);
+    Tester.TimeTest(rounds);
     Console.WriteLine();
 
-    Console.WriteLine("Test Complete!");
-
-    return;
+    Console.WriteLine("Test(s) Complete!");
 }
 
-Console.WriteLine("You are running Ari's Hash Function! If you wish to exit, simply type \"I COMMAND EXIT\". If you wish to enter test mode type \"I COMMAND TEST\".");
+Console.WriteLine("You are running Ari's Hash Function! If you wish to exit, simply type \"EXIT\" (or type CNTRL + C). If you wish to enter test mode type \"TEST\".");
+Console.WriteLine();
 
-while (true)
+
+int safetyLimit = 1000; // Max amount of hashes before automatic quit to prevent crashes.
+for (int i = 0; i < safetyLimit; i++)
 {
     Console.Write("String to hash [type and then press enter]: ");
 
     string str = Console.ReadLine();
 
-    switch (str.ToUpper())
+    if (String.IsNullOrEmpty(str))
     {
-        case "I COMMAND EXIT":
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        Console.WriteLine("There was an issue reading the input");
+        Console.ForegroundColor = ConsoleColor.Black;
+
+        continue;
+    }
+
+    switch (str)
+    {
+        case "EXIT":
             return;
 
-        case "I COMMAND TEST":
+        case "TEST":
             Test();
-            break;
+            return;
     }
 
     BigInteger hash = Utilities.Hash(str);
-
     Console.WriteLine(hash.ToString("X").TrimStart('0'));
     Console.WriteLine();
 }

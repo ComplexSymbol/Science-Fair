@@ -3,8 +3,6 @@
 using System.Numerics;
 using System.Text;
 
-
-
 namespace HashDependencies
 {
     ///<summary>
@@ -71,10 +69,12 @@ namespace HashDependencies
         /// </summary>
         public static int[] GetBitList(BigInteger value)
         {
-            int[] bitList = new int[value.GetBitLength()];
+            int[] bitList = new int[512];
 
-            for (int i = 0; i < bitList.Length; i++)
-                bitList[i] = (value & ((BigInteger)1ul << (bitList.Length - 1 - i))) > 0 ? 1 : 0;
+            int valLength = (int)value.GetBitLength();
+
+            for (int i = 0; i < valLength; i++)
+                bitList[i] = (value & ((BigInteger)1 << (valLength - 1 - i))) > 0 ? 1 : 0;
 
             return bitList;
         }
@@ -129,7 +129,7 @@ namespace HashDependencies
         {
             //12 arr length
             if (consts12.Length < 12)
-                throw new ArgumentException($"Length of array arguement 'consts' must be greater than or equal to 12 ({consts12.Length} < 12)");
+                throw new ArgumentException($"Length of array argument 'consts' must be greater than or equal to 12 ({consts12.Length} < 12)");
 
             return setting switch
             {
@@ -196,13 +196,13 @@ namespace HashDependencies
                 popCount += BitOperations.PopCount((ulong)b);
 
                 identifier ^= b;
-                identifier = (BitOperations.RotateLeft(identifier, 8)) ^ b;
-                identifier = (BitOperations.RotateLeft(identifier, 8)) ^ b;
+                identifier = (BitOperations.RotateLeft(identifier, 6)) ^ b;
+                identifier = (BitOperations.RotateLeft(identifier, 7)) ^ b;
                 identifier = (BitOperations.RotateLeft(identifier, 8)) ^ b;
                 identifier = BitOperations.RotateRight(identifier, b);
             }
 
-            //Set the 8 initial hash values and consts (see background research plan) (setting consts down here because
+            //Set the 8 initial hash values and consts (see solutions) (setting consts down here because
             //there are values generated right before this that are necessary to const generation)
             for (int i = 1; i < 65; i++)
             {
@@ -346,34 +346,14 @@ namespace HashDependencies
                     intermediateHVs[j, i + 1] = AdditionMod32(a, intermediateHVs[j, i]);
             }
 
-
-            Console.WriteLine();
-            Console.WriteLine();
-
-            foreach (uint c in consts)
-            {
-                Console.WriteLine(Convert.ToString(c, 2));
-            }
-
-            Print2DArray(intermediateHVs);
-            Console.WriteLine();
-
             BigInteger output = 0;
 
+            //Concatenate the IHVs
             for (int i = 0; i < 8; i++)
             {
-                Console.WriteLine(Convert.ToString(intermediateHVs[i, intermediateHVs.GetLength(1) - 1], 2));
                 output <<= 32;
                 output += intermediateHVs[i, intermediateHVs.GetLength(1) - 1];
             }
-
-            //0 followed by 255 1's in binary
-            //output %= BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819967");
-
-            //1 followed by 255 0's in binary
-            //output += BigInteger.Parse("57896044618658097711785492504343953926634992332820282019728792003956564819968");
-
-            Console.WriteLine(string.Join("", GetBitList(output)));
 
             return output;
         }
